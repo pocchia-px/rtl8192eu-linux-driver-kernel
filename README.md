@@ -1,6 +1,5 @@
-# rtl8192eu-linux-driver-kernel-3.14
-RTL8192EU Realtek driver for linux kernel 3.14
-
+# RTL8192EU
+Chipset: Realtek-RTL8192EU  
 **NOTE:** Works on Rosewill RNX-N180UBE v2 N300 Wireless Adapter and TP-Link TL-WN823N
 
 # Support Linux Kernel 3.14
