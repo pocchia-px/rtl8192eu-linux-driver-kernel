@@ -129,6 +129,7 @@ CONFIG_PLATFORM_MOZART = n
 CONFIG_PLATFORM_RTK119X = n
 CONFIG_PLATFORM_NOVATEK_NT72668 = n
 CONFIG_PLATFORM_HISILICON = n
+CONFIG_PLATFORM_FS_IMX6 = n
 ###############################################################
 
 CONFIG_DRVEXT_MODULE = n
@@ -1161,12 +1162,10 @@ CROSS_COMPILE := /home/share/CusEnv/FreeScale/cortex7hf-vfp-neon-linux-gnueabi/b
 KSRC ?= /home/share/CusEnv/FreeScale/FS_kernel_env
 endif
 
-ifeq ($(CONFIG_PLATFORM_ARM_AARCH32), y)
+ifeq ($(CONFIG_PLATFORM_FS_IMX6), y)
 EXTRA_CFLAGS += -DCONFIG_LITTLE_ENDIAN
-EXTRA_CFLAGS += -DCONFIG_IOCTL_CFG80211 -DRTW_USE_CFG80211_STA_EVENT
-SUBARCH := $(shell uname -m | sed -e s/i.86/i386/)
-ARCH ?= $(SUBARCH)
-CROSS_COMPILE := /opt/freescale/usr/local/gcc-4.1.2-glibc-2.5-nptl-3/arm-none-linux-gnueabi/bin/arm-none-linux-gnueabi-
+ARCH := arm
+CROSS_COMPILE ?= /opt/freescale/usr/local/gcc-4.1.2-glibc-2.5-nptl-3/arm-none-linux-gnueabi/bin/arm-none-linux-gnueabi-
 KVER  := $(shell uname -r)
 KSRC := /lib/modules/$(KVER)/build
 MODDESTDIR := /lib/modules/$(KVER)/kernel/drivers/net/wireless/
