@@ -1164,12 +1164,14 @@ endif
 
 ifeq ($(CONFIG_PLATFORM_FS_IMX6), y)
 EXTRA_CFLAGS += -DCONFIG_LITTLE_ENDIAN
-ARCH := arm
-CROSS_COMPILE ?= /opt/freescale/usr/local/gcc-4.1.2-glibc-2.5-nptl-3/arm-none-linux-gnueabi/bin/arm-none-linux-gnueabi-
+SUBARCH := $(shell uname -m | sed -e s/i.86/i386/)
+ARCH ?= $(SUBARCH)
+CROSS_COMPILE ?=
 KVER  := $(shell uname -r)
-KSRC := /lib/modules/$(KVER)/build
+KSRC ?= /lib/modules/$(KVER)/build
 MODDESTDIR := /lib/modules/$(KVER)/kernel/drivers/net/wireless/
 INSTALL_PREFIX :=
+MODULE_NAME := 8192eu
 endif
 
 
