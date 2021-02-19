@@ -45,7 +45,7 @@ from source when the kernel is upgraded (for example using your package manager)
     ...
     CONFIG_PLATFORM_I386_PC = n
     ...
-    CONFIG_PLATFORM_ARM_AARCH32 = y
+    CONFIG_PLATFORM_FS_IMX6 = y
     ```
 
 4. Add the driver to DKMS. This will copy the source to a system directory so
