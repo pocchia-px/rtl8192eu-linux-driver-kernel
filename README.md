@@ -1,103 +1,79 @@
-# RTL8192EU
-Chipset: Realtek-RTL8192EU  
-**NOTE:** Works on Rosewill RNX-N180UBE v2 N300 Wireless Adapter and TP-Link TL-WN823N
+## rtl8192eu-linux
+Realtek rtl8192eu official Linux driver v5.11.2.1
 
-# Support Linux Kernel 3.14
-* Works on Linux 3.14.38  
-* Support arch and cross compilers
+This driver is based on the (latest) official and manufacturer supported Realtek v5.11.2.1 driver with fixes and improvements to support the latest kernels (up to 6.3).
 
-## Building and installing using DKMS
+### Before installing
 
-This tree supports Dynamic Kernel Module Support (DKMS), a system for
-generating kernel modules from out-of-tree kernel sources. It can be used to
-install/uninstall kernel modules, and the module will be automatically rebuilt
-from source when the kernel is upgraded (for example using your package manager).
+If you're using a different architecture than x86, please set (MakeFile) ```CONFIG_PLATFORM_I386_PC = n``` and also set your architecture (for example ```CONFIG_PLATFORM_ARM_RPI = y``` for 32-bit ARM, or ```CONFIG_PLATFORM_ARM_AARCH64 = y``` for 64-bit ARM).
 
-1. Install DKMS and other required tools
+Monitor mode can be enabled by setting ```CONFIG_WIFI_MONITOR = y```.
 
-    ```shell
-    $ sudo apt-get install git linux-headers-generic build-essential dkms;
-    ```
+Also, make sure you have headers, build, dkms and git packages installed. 
 
-2. Clone this repository and change your directory to cloned path.
+##### Debian, Ubuntu, Mint:
 
-    ```shell
-    $ git clone https://github.com/Mange/rtl8192eu-linux-driver;
-    ```
-    ```shell
-    $ cd rtl8192eu-linux-driver;
-    ```
+```sudo apt install linux-headers-generic build-essential dkms git```
 
-3. The Makefile is preconfigured to handle most x86/PC versions. However, if you are compiling for something other than an intel x86 architecture, you need to first select the platform.
+##### Fedora:
 
-    * for arm64 devices (e.g. Orange Pi PC 2):
+```sudo dnf groupinstall "C Development Tools and Libraries"  & sudo dnf install dkms git```
 
-    ```sh
-    ...
-    CONFIG_PLATFORM_I386_PC = n
-    ...
-    CONFIG_PLATFORM_ARM_AARCH64 = y
-    ```
-	
-	* for arm32 devices (e.g. I.MX6 Sabrelight):
+##### RHEL, CentOS:
 
-    ```sh
-    ...
-    CONFIG_PLATFORM_I386_PC = n
-    ...
-    CONFIG_PLATFORM_FS_IMX6 = y
-    ```
+```sudo yum groupinstall "Development Tools" && sudo yum install dkms git```
 
-4. Add the driver to DKMS. This will copy the source to a system directory so
-that it can used to rebuild the module on kernel upgrades.
+##### Arch Linux, Manjaro:
 
-    ```shell
-    $ sudo dkms add .;
-    ```
+```sudo pacman -S base-devel dkms git```
 
-5. Build and install the driver.
+##### openSUSE:
 
-    ```shell
-    $ sudo dkms install rtl8192eu/1.0;
-    ```
+```sudo zypper install -t pattern devel_C_C++ && sudo zypper install dkms git```
 
-6. Distributions based on Debian & Ubuntu have RTL8XXXU driver present & running in kernelspace. To use our RTL8192EU driver, we need to blacklist RTL8XXXU.
+### Automated install 
 
-    ```shell
-    $ echo "blacklist rtl8xxxu" | sudo tee /etc/modprobe.d/rtl8xxxu.conf;
-    ```
+Run from driver directory:
+```
+./install_wifi.sh
+```
 
-7. Force RTL8192EU Driver to be active from boot.
-    ```shell
-    $ echo -e "8192eu\n\nloop" | sudo tee /etc/modules;
-    ```
+### Manual install
 
-8. Newer versions of Ubuntu has weird plugging/replugging issue (Check #94). This includes weird idling issues, To fix this:
+Remove available drivers with (skip if `sudo lshw -C network` and `dkms status` do not show any wifi drivers):
 
-    ```shell
-    $ echo "options 8192eu rtw_power_mgnt=0 rtw_enusbss=0" | sudo tee /etc/modprobe.d/8192eu.conf;
-    ```
+```
+sudo rmmod 8192eu
+sudo rmmod rtl8xxxu
+sudo dkms remove -m rtl8192eu -v 1.0
+```
 
-9. Update changes to Grub & initramfs
+Blacklist default driver (rtl8xxxu on Ubuntu):
 
-    ```shell
-    $ sudo update-grub; sudo update-initramfs -u;
-    ```
+```
+echo "blacklist rtl8xxxu" >> ./blacklist-rtl8xxxu.conf
+sudo mv ./blacklist-rtl8xxxu.conf /etc/modprobe.d/
+```
 
-10. Reboot system to load new changes from newly generated initramfs.
+Run add and install commands from driver directory:
 
-    ```shell
-    $ systemctl reboot -i;
-    ```
+```
+sudo cp -ar . /usr/src/rtl8192eu-1.0
+sudo dkms add -m rtl8192eu -v 1.0
+sudo dkms install -m rtl8192eu -v 1.0
+```
 
-11. Check that your kernel has loaded the right module:
- 
-    ```shell
-    $ sudo lshw -c network;
-    ```
-   
-You should see the line ```driver=8192eu```
-    
-If you wish to uninstall the driver at a later point, use
-_sudo dkms uninstall rtl8192eu/1.0_. To completely remove the driver from DKMS use
-_sudo dkms remove rtl8192eu/1.0 --all_.
+Load driver (or reboot):
+```
+sudo modprobe 8192eu
+```
+
+### After installing (secure boot)
+
+If secure boot (deployed mode) is enabled, you must enroll the public key mentioned during the install process once. This may require installing additional packages like mokutil keyutils and openssl. You can temporarily switch to audit mode (bios) and use the driver normally.
+
+To enroll use:
+```
+sudo mokutil --import [public_key]
+```
+After reboot, you can enroll the key.
